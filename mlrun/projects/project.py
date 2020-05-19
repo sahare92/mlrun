@@ -41,6 +41,9 @@ class ProjectError(Exception):
     pass
 
 
+def my_test_man():
+    return 'this is a test'
+
 def new_project(name, context=None, init_git=False):
     """Create a new MLRun project
 
