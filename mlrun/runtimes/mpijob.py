@@ -117,7 +117,7 @@ class MpiRuntime(KubejobRuntime):
 
         update_in(job, 'metadata', meta.to_dict())
         update_in(job, 'spec.mpiReplicaSpecs.worker.replicas', self.spec.replicas or 1)
-
+        logger.info('generated mpijob: {0}'.format(job))
         resp = self._submit_mpijob(job, meta.namespace)
         state = None
         timeout = int(config.submit_timeout) or 120
