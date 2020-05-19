@@ -25,7 +25,7 @@ from kubernetes import client
 
 
 _mpijob_template = {
- 'apiVersion': 'kubeflow.org/v1alpha1',
+ 'apiVersion': 'kubeflow.org/v1alpha2',
  'kind': 'MPIJob',
  'metadata': {
      'name': '',
@@ -50,7 +50,7 @@ _mpijob_template = {
          }}}}
 
 mpi_group = 'kubeflow.org'
-mpi_version = 'v1alpha1'
+mpi_version = 'v1alpha2'
 mpi_plural = 'mpijobs'
 
 
