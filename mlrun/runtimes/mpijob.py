@@ -24,7 +24,7 @@ from ..execution import MLClientCtx
 from kubernetes import client
 
 mpi_group = 'kubeflow.org'
-mpi_version = 'v1alpha2'
+mpi_version = 'v1'
 mpi_plural = 'mpijobs'
 
 _mpijob_pod_template = {
@@ -45,7 +45,7 @@ _mpijob_pod_template = {
 }
 
 
-def _generate_mpi_job(mpi_job_pod_template):
+def _generate_mpi_job(launcher_pod_template, worker_pod_template):
     return {
      'apiVersion': 'kubeflow.org/{0}'.format(mpi_version),
      'kind': 'MPIJob',
@@ -57,11 +57,10 @@ def _generate_mpi_job(mpi_job_pod_template):
          # 'slotsPerWorker': 1, TODO: figure out what to do with all those commented out
          'mpiReplicaSpecs': {
              'launcher': {
-                 # 'replicas': 1,
-                 'template': mpi_job_pod_template
+                 'template': launcher_pod_template
              }, 'worker': {
                  'replicas': 1,
-                 'template': mpi_job_pod_template
+                 'template': worker_pod_template
              }
          }
      }}
@@ -85,35 +84,43 @@ class MpiRuntime(KubejobRuntime):
 
         # Populate an mpijob object
 
-        # start by populating the pod template
-        job_pod_template = deepcopy(_mpijob_pod_template)
-        if self.spec.image:
-            _update_container(job_pod_template, 'image', self.full_image_path())
-        _update_container(job_pod_template, 'volumeMounts', self.spec.volume_mounts)
-        extra_env = {'MLRUN_EXEC_CONFIG': runobj.to_json()}
-        if self.spec.rundb:
-            extra_env['MLRUN_DBPATH'] = self.spec.rundb
-        extra_env = [{'name': k, 'value': v} for k, v in extra_env.items()]
-        _update_container(job_pod_template, 'env', extra_env + self.spec.env)
-        if self.spec.image_pull_policy:
-            _update_container(
-                job_pod_template, 'imagePullPolicy', self.spec.image_pull_policy)
+        # start by populating pod templates
+        launcher_pod_template = deepcopy(_mpijob_pod_template)
+        worker_pod_template = deepcopy(_mpijob_pod_template)
+
+        # configuration for both launcher and workers
+        for pod_template in [launcher_pod_template, worker_pod_template]:
+            if self.spec.image:
+                _update_container(pod_template, 'image', self.full_image_path())
+            _update_container(pod_template, 'volumeMounts', self.spec.volume_mounts)
+            extra_env = {'MLRUN_EXEC_CONFIG': runobj.to_json()}
+            if self.spec.rundb:
+                extra_env['MLRUN_DBPATH'] = self.spec.rundb
+            extra_env = [{'name': k, 'value': v} for k, v in extra_env.items()]
+            _update_container(pod_template, 'env', extra_env + self.spec.env)
+            if self.spec.image_pull_policy:
+                _update_container(
+                    pod_template, 'imagePullPolicy', self.spec.image_pull_policy)
+            if self.spec.workdir:
+                _update_container(pod_template, 'workingDir', self.spec.workdir)
+            if self.spec.image_pull_secret:
+                update_in(pod_template, 'spec.imagePullSecrets',
+                          [{'name': self.spec.image_pull_secret}])
+            update_in(pod_template, 'metadata.labels', pod_labels)
+            update_in(pod_template, 'spec.volumes', self.spec.volumes)
+
+        # configuration for workers
         if self.spec.resources:
-            _update_container(job_pod_template, 'resources', self.spec.resources)
-        if self.spec.workdir:
-            _update_container(job_pod_template, 'workingDir', self.spec.workdir)
+            _update_container(worker_pod_template, 'resources', self.spec.resources)
+
+        # configuration for launcher
         if self.spec.command:
             _update_container(
-                job_pod_template, 'command',
+                launcher_pod_template, 'command',
                 ['mpirun', 'python', self.spec.command] + self.spec.args)
-        if self.spec.image_pull_secret:
-            update_in(job_pod_template, 'spec.imagePullSecrets',
-                      [{'name': self.spec.image_pull_secret}])
-        update_in(job_pod_template, 'metadata.labels', pod_labels)
-        update_in(job_pod_template, 'spec.volumes', self.spec.volumes)
 
         # generate mpi job using the above job_pod_template
-        job = _generate_mpi_job(job_pod_template)
+        job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
 
         update_in(job, 'metadata', meta.to_dict())
         update_in(job, 'spec.mpiReplicaSpecs.worker.replicas', self.spec.replicas or 1)
