@@ -120,6 +120,9 @@ class MpiRuntime(KubejobRuntime):
         logger.info('generated mpijob: {0}'.format(job))
         resp = self._submit_mpijob(job, meta.namespace)
         state = None
+        logger.info('sleeping after mpijob creation')
+        time.sleep(300)
+        logger.info('finished sleeping after mpijob creation')
         timeout = int(config.submit_timeout) or 120
         for _ in range(timeout):
             resp = self.get_job(meta.name, meta.namespace)
