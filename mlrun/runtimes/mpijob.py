@@ -13,6 +13,7 @@
 # limitations under the License.
 import time
 from copy import deepcopy
+import shlex
 
 from .utils import AsyncLogWriter, RunError
 from ..config import config
@@ -114,10 +115,15 @@ class MpiRuntime(KubejobRuntime):
             _update_container(worker_pod_template, 'resources', self.spec.resources)
 
         # configuration for launcher
+        # quote commands
+        quoted_commands = []
+        for command in self.spec.command + self.spec.args:
+            quoted_commands.append(shlex.quote(command))
+
         if self.spec.command:
             _update_container(
                 launcher_pod_template, 'command',
-                ['mpirun', 'python', self.spec.command] + self.spec.args)
+                ['mpirun', 'python'] + quoted_commands)
 
         # generate mpi job using the above job_pod_template
         job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
