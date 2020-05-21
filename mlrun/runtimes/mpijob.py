@@ -42,9 +42,7 @@ _mpijob_pod_template = {
                 'limits': {}}}],
         'volumes': []
     },
-    'metadata': {
-        'labels': {}
-    }
+    'metadata': {}
 }
 
 
