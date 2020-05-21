@@ -57,9 +57,9 @@ def _generate_mpi_job(launcher_pod_template, worker_pod_template):
      'spec': {
          # 'slotsPerWorker': 1, TODO: figure out what to do with all those commented out
          'mpiReplicaSpecs': {
-             'launcher': {
+             'Launcher': {
                  'template': launcher_pod_template
-             }, 'worker': {
+             }, 'Worker': {
                  'replicas': 1,
                  'template': worker_pod_template
              }
