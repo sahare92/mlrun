@@ -121,7 +121,7 @@ class MpiRuntime(KubejobRuntime):
         if self.spec.command:
             _update_container(
                 launcher_pod_template, 'command',
-                ['mpirun', 'python', shlex.quote(self.spec.command)] + quoted_args)
+                ['mpirun', 'python', '\"{0}\"'.format(shlex.quote(self.spec.command))] + quoted_args)
 
         # generate mpi job using the above job_pod_template
         job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
@@ -131,7 +131,7 @@ class MpiRuntime(KubejobRuntime):
         logger.info('generated mpijob: {0}'.format(job))
         resp = self._submit_mpijob(job, meta.namespace)
         state = None
-        logger.info('sleeping after mpijob creation')
+        logger.info('sleeping after mpijob creation 1')
         time.sleep(300)
         logger.info('finished sleeping after mpijob creation')
         timeout = int(config.submit_timeout) or 120
