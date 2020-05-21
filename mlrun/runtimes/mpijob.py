@@ -55,7 +55,6 @@ def _generate_mpi_job(launcher_pod_template, worker_pod_template):
          'namespace': 'default-tenant'
      },
      'spec': {
-         # 'slotsPerWorker': 1, TODO: figure out what to do with all those commented out
          'mpiReplicaSpecs': {
              'Launcher': {
                  'template': launcher_pod_template
@@ -111,6 +110,8 @@ class MpiRuntime(KubejobRuntime):
             update_in(pod_template, 'spec.volumes', self.spec.volumes)
 
         # configuration for workers
+        # update resources only for workers because the launcher doesn't require
+        # special resources (like GPUs, Memory, etc..)
         if self.spec.resources:
             _update_container(worker_pod_template, 'resources', self.spec.resources)
 
@@ -126,28 +127,27 @@ class MpiRuntime(KubejobRuntime):
         # generate mpi job using the above job_pod_template
         job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
 
-        update_in(job, 'metadata', meta.to_dict())
+        # update the replicas only for workers
         update_in(job, 'spec.mpiReplicaSpecs.Worker.replicas', self.spec.replicas or 1)
-        logger.info('generated mpijob: {0}'.format(job))
+
+        update_in(job, 'metadata', meta.to_dict())
+
         resp = self._submit_mpijob(job, meta.namespace)
-        state = None
-        logger.info('sleeping after mpijob creation 1')
-        time.sleep(300)
-        logger.info('finished sleeping after mpijob creation')
+        launcher_state = None
+
         timeout = int(config.submit_timeout) or 120
         for _ in range(timeout):
             resp = self.get_job(meta.name, meta.namespace)
-            state = get_in(resp, 'status.replicaStatuses.Launcher')
-            logger.info('got state: {0}'.format(str(state)))
-            if resp and state:
+            launcher_state = get_in(resp, 'status.replicaStatuses.Launcher')
+            if resp and launcher_state:
                 break
             time.sleep(1)
 
         if resp:
             logger.info('MpiJob {} state={}'.format(
-                meta.name, state or 'unknown'))
-            if state:
-                state = state.lower()
+                meta.name, launcher_state or 'unknown'))
+            if launcher_state:
+                state = 'active' if launcher_state['active'] == 1 else 'error'
                 launcher, status = self._get_launcher(meta.name,
                                                       meta.namespace)
                 execution.set_hostname(launcher)
