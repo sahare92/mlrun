@@ -70,7 +70,7 @@ def _update_container(struct, key, value):
     struct['spec']['containers'][0][key] = value
 
 
-class MpiRuntime(KubejobRuntime):
+class MpiRuntimeV1(KubejobRuntime):
     kind = 'mpijob'
     _is_nested = False
 
@@ -83,7 +83,6 @@ class MpiRuntime(KubejobRuntime):
         pod_labels['mlrun/job'] = meta.name
 
         # Populate an mpijob object
-
         # start by populating pod templates
         launcher_pod_template = deepcopy(_mpijob_pod_template)
         worker_pod_template = deepcopy(_mpijob_pod_template)
@@ -109,13 +108,13 @@ class MpiRuntime(KubejobRuntime):
             update_in(pod_template, 'metadata.labels', pod_labels)
             update_in(pod_template, 'spec.volumes', self.spec.volumes)
 
-        # configuration for workers
+        # configuration for workers only
         # update resources only for workers because the launcher doesn't require
         # special resources (like GPUs, Memory, etc..)
         if self.spec.resources:
             _update_container(worker_pod_template, 'resources', self.spec.resources)
 
-        # configuration for launcher
+        # configuration for launcher only
         quoted_args = []
         for arg in self.spec.args:
             quoted_args.append(shlex.quote(arg))
@@ -124,7 +123,7 @@ class MpiRuntime(KubejobRuntime):
                 launcher_pod_template, 'command',
                 ['mpirun', 'python', shlex.quote(self.spec.command)] + quoted_args)
 
-        # generate mpi job using the above job_pod_template
+        # generate mpi job using both pod templates
         job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
 
         # update the replicas only for workers
