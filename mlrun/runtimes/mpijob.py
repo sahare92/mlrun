@@ -42,7 +42,9 @@ _mpijob_pod_template = {
                 'limits': {}}}],
         'volumes': []
     },
-    'metadata': {}
+    'metadata': {
+        'labels': {}
+    }
 }
 
 
@@ -243,7 +245,7 @@ class MpiRuntime(KubejobRuntime):
     def get_pods(self, name=None, namespace=None, launcher=False):
         k8s = self._get_k8s()
         namespace = k8s.ns(namespace)
-        selector = 'mlrun/class=mpijob'
+        selector = ''
         if name:
             selector += ',mpi_job_name={}'.format(name)
         if launcher:
