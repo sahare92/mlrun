@@ -246,7 +246,7 @@ class MpiRuntime(KubejobRuntime):
         # TODO: understance why the labels that are given on the template aren't passed into the pods
         selector = ''
         if name:
-            selector += 'mpi_job_name={}'.format(name)
+            selector += 'mpi-job-name={}'.format(name)
         if launcher:
             selector += ',mpi-job-role=launcher'
         logger.info('the generated get pods selector is: {0}, namespace: {1}'.format(selector, namespace))
