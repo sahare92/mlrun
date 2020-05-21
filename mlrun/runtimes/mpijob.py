@@ -249,6 +249,7 @@ class MpiRuntime(KubejobRuntime):
             selector += 'mpi_job_name={}'.format(name)
         if launcher:
             selector += ',mpi-job-role=launcher'
+        logger.info('the generated get pods selector is: {0}, namespace: {1}'.format(selector, namespace))
         pods = k8s.list_pods(selector=selector, namespace=namespace)
         if pods:
             return {p.metadata.name: p.status.phase for p in pods}
