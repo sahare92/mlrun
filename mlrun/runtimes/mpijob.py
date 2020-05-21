@@ -121,13 +121,13 @@ class MpiRuntime(KubejobRuntime):
         if self.spec.command:
             _update_container(
                 launcher_pod_template, 'command',
-                ['mpirun', 'python', '\"{0}\"'.format(shlex.quote(self.spec.command))] + quoted_args)
+                ['mpirun', 'python', shlex.quote(self.spec.command)] + quoted_args)
 
         # generate mpi job using the above job_pod_template
         job = _generate_mpi_job(launcher_pod_template, worker_pod_template)
 
         update_in(job, 'metadata', meta.to_dict())
-        update_in(job, 'spec.mpiReplicaSpecs.worker.replicas', self.spec.replicas or 1)
+        update_in(job, 'spec.mpiReplicaSpecs.Worker.replicas', self.spec.replicas or 1)
         logger.info('generated mpijob: {0}'.format(job))
         resp = self._submit_mpijob(job, meta.namespace)
         state = None
@@ -137,7 +137,8 @@ class MpiRuntime(KubejobRuntime):
         timeout = int(config.submit_timeout) or 120
         for _ in range(timeout):
             resp = self.get_job(meta.name, meta.namespace)
-            state = get_in(resp, 'status.launcherStatus')
+            state = get_in(resp, 'status.replicaStatuses.Launcher')
+            logger.info('got state: {0}'.format(str(state)))
             if resp and state:
                 break
             time.sleep(1)
@@ -246,7 +247,7 @@ class MpiRuntime(KubejobRuntime):
         if name:
             selector += ',mpi_job_name={}'.format(name)
         if launcher:
-            selector += ',mpi_role_type=launcher'
+            selector += ',mpi-job-role=launcher'
         pods = k8s.list_pods(selector=selector, namespace=namespace)
         if pods:
             return {p.metadata.name: p.status.phase for p in pods}
