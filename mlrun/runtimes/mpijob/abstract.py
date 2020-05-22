@@ -55,7 +55,7 @@ class AbstractMPIJobRuntime(KubejobRuntime, abc.ABC):
 
         meta = self._get_meta(runobj, True)
 
-        job = self._generate_mpi_job(runobj)
+        job = self._generate_mpi_job(runobj, meta)
 
         resp = self._submit_mpijob(job, meta.namespace)
 
