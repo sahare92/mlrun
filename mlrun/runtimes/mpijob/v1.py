@@ -129,10 +129,14 @@ class MpiRuntimeV1(AbstractMPIJobRuntime):
 
     def _get_job_launcher_status(self, resp: list) -> str:
         launcher_status = get_in(resp, 'status.replicaStatuses.Launcher')
-        if 'active' in launcher_status and launcher_status['active'] == 1:
-            return 'active'
+        if launcher_status is None:
+            return ''
 
-        return 'failed'
+        for status in ['active', 'failed', 'succeeded']:
+            if launcher_status.get(status, 0) == 1:
+                return status
+
+        return ''
 
     def _pretty_print_jobs(self, items: list):
         print('{:10} {:20} {:21} {}'.format(

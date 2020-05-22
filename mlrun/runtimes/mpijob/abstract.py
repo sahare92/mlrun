@@ -63,6 +63,7 @@ class AbstractMPIJobRuntime(KubejobRuntime, abc.ABC):
         timeout = int(config.submit_timeout) or 120
         for _ in range(timeout):
             resp = self.get_job(meta.name, meta.namespace)
+            logger.info('MpiJob response: {}'.format(str(resp)))
             state = self._get_job_launcher_status(resp)
             if resp and state:
                 break
