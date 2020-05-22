@@ -34,7 +34,7 @@ class AbstractMPIJobRuntime(KubejobRuntime, abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _generate_mpi_job(self, runobj: RunObject) -> dict:
+    def _generate_mpi_job(self, runobj: RunObject, meta: client.V1ObjectMeta) -> dict:
         pass
 
     @abc.abstractmethod
@@ -53,9 +53,9 @@ class AbstractMPIJobRuntime(KubejobRuntime, abc.ABC):
         if runobj.metadata.iteration:
             self.store_run(runobj)
 
-        job = self._generate_mpi_job(runobj)
-
         meta = self._get_meta(runobj, True)
+
+        job = self._generate_mpi_job(runobj)
 
         resp = self._submit_mpijob(job, meta.namespace)
 
