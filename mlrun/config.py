@@ -46,7 +46,7 @@ default_config = {
     'version': '',                   # will be set to current version
     'images_tag': '',                # tag to use with mlrun images e.g. mlrun/mlrun (defaults to version)
     'kfp_ttl': '86400',              # KFP ttl in sec, after that completed PODs will be deleted
-    'kfp_image': 'sahare92/mlrun:0.4.8',  # image to use for KFP runner (defaults to mlrun/mlrun)
+    'kfp_image': 'sahare92/mlrun:0.4.8-test',  # image to use for KFP runner (defaults to mlrun/mlrun)
     'kaniko_version': 'v0.19.0',     # kaniko builder version
     'package_path': 'mlrun',         # mlrun pip package
     'default_image': 'python:3.6-jessie',
