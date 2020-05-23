@@ -31,7 +31,7 @@ class DynamicallyInferredMpiRuntime(KubejobRuntime):
         mpi_job_crd_version = 'v1alpha1'
 
         # get mpi-operator pod
-        res = self._k8s.list_pods(namespace=namespace, selector='release=mpi-operator')
+        res = self._get_k8s().list_pods(namespace=namespace, selector='release=mpi-operator')
         if len(res) > 0:
             mpi_operator_pod = res[0]
             mpi_job_crd_version = mpi_operator_pod.metadata.labels.get('crd-version', mpi_job_crd_version)
