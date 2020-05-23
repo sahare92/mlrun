@@ -12,6 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .dynamic import DynamicallyInferredMpiRuntime
 from .v1 import MpiRuntimeV1
 from .v1alpha1 import MpiRuntimeV1Alpha1
