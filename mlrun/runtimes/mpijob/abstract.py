@@ -48,6 +48,9 @@ class AbstractMPIJobRuntime(KubejobRuntime, abc.ABC):
     def _pretty_print_jobs(self, items: list):
         pass
 
+    def invoke_run(self, runobj: RunObject, execution: MLClientCtx):
+        self._run(runobj, execution)
+
     def _run(self, runobj: RunObject, execution: MLClientCtx):
 
         if runobj.metadata.iteration:

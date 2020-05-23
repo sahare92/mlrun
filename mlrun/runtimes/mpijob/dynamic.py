@@ -19,10 +19,11 @@ from mlrun.model import RunObject
 from mlrun.runtimes.kubejob import KubejobRuntime
 
 
+# infer the mpi runtime dynamically
 class DynamicallyInferredMpiRuntime(KubejobRuntime):
     def _run(self, runobj: RunObject, execution: MLClientCtx):
         inferred_runtime = self._infer_mpi_runtime()
-        return inferred_runtime._run(runobj, execution)
+        return inferred_runtime.invoke_run(runobj, execution)
 
     def _infer_mpi_runtime(self):
         namespace = self._get_k8s().ns()
