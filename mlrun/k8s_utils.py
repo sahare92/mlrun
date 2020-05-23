@@ -40,6 +40,7 @@ class K8sHelper:
             self._init_k8s_config()
         self.v1api = client.CoreV1Api()
         self.crdapi = client.CustomObjectsApi()
+        self.apiextenstionsv1beta1api = client.ApiextensionsV1beta1Api()
 
     def ns(self, namespace=None):
         return namespace or self.namespace
@@ -268,6 +269,9 @@ class K8sHelper:
                 results[p.metadata.name] = p.status.phase
 
         return results
+
+    def get_custom_resource_definition(self, name=''):
+        return self.apiextenstionsv1beta1api.read_custom_resource_definition(name)
 
 
 class BasePod:
