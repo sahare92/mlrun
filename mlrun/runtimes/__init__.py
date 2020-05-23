@@ -17,7 +17,7 @@ from .local import HandlerRuntime, LocalRuntime  # noqa
 from .function import RemoteRuntime, new_model_server  # noqa
 from .mpijob import MpiRuntimeV1Alpha1  # noqa
 from .mpijob import MpiRuntimeV1  # noqa
-from .mpijob import infer_mpi_runtime  # noqa
+from .mpijob import DynamicallyInferredMpiRuntime  # noqa
 from .daskjob import DaskCluster, get_dask_resource  # noqa
 from .kubejob import KubejobRuntime  # noqa
 from .sparkjob import SparkRuntime  # noqa
@@ -34,7 +34,7 @@ runtime_dict = {'remote': RemoteRuntime,
                 'nuclio': RemoteRuntime,
                 'dask': DaskCluster,
                 'job': KubejobRuntime,
-                'mpijob': infer_mpi_runtime(),
+                'mpijob': DynamicallyInferredMpiRuntime,
                 'mpijob_v1alpha1': MpiRuntimeV1Alpha1,
                 'mpijob_v1': MpiRuntimeV1,
                 'spark': SparkRuntime}
