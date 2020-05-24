@@ -48,7 +48,7 @@ class K8sHelper:
         try:
             config.load_incluster_config()
             if log:
-                logger.info('using in-cluster config.-mytest37')
+                logger.info('using in-cluster config.-mytest38')
         except Exception:
             try:
                 config.load_kube_config(self.config_file)
