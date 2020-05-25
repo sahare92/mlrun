@@ -477,6 +477,8 @@ class HTTPRunDB(RunDBInterface):
             logger.error('bad resp!!\n{}'.format(resp.text))
             raise ValueError('bad get pipeline response, {}'.format(resp.text))
 
+        logger.info('resp: {}'.format(str(resp)))
+
         return resp.json()
 
 
