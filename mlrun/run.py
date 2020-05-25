@@ -590,12 +590,12 @@ def run_pipeline(pipeline, arguments=None, experiment=None, run=None,
     return id
 
 
-def get_pipeline(run_id, wait=0, namespace=None):
+def get_pipeline(run_id, wait=0, namespace=None, db=''):
     """Get or wait for Pipeline status, wait time in sec"""
 
     remote = not get_k8s_helper(init=False).is_running_inside_kubernetes_cluster()
     if not remote:
-        mldb = get_run_db().connect()
+        mldb = get_run_db(db).connect()
         if mldb.kind != 'http':
             raise ValueError('get pipeline require access to remote api-service'
                              ', please set the dbpath url')
