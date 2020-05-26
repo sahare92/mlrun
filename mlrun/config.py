@@ -112,8 +112,8 @@ class Config:
     def dump_yaml(self, stream=None):
         return yaml.dump(self._cfg, stream, default_flow_style=False)
 
-    def safe_get(self, attr):
-        return self._cfg.get(attr, None)
+    def safe_get(self, attr, default=None):
+        return self._cfg.get(attr, default)
 
     @staticmethod
     def reload():
