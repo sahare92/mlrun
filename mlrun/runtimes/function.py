@@ -227,11 +227,13 @@ class RemoteRuntime(KubeResource):
                 source = source.replace("git://", "https://")
 
         # populate spec with relevant fields
-        self.spec.build.source = source
-        self.spec.build.codeEntryType = code_entry_type
-        self.spec.build.codeEntryAttributes = code_entry_attributes
-        if handler:
-            self.spec.function_handler = handler
+        config = nuclio.config.new_config()
+        update_in(config, "spec.handler", handler or self.spec.function_handler)
+        update_in(config, "spec.build.path", source)
+        update_in(config, "spec.build.codeEntryType", code_entry_type)
+        update_in(config, "spec.build.codeEntryAttributes", code_entry_attributes)
+        self.spec.base_spec = config
+
         return self
 
     def with_v3io(self, local="", remote=""):
@@ -672,14 +674,6 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         spec.set_config("spec.minReplicas", function.spec.min_replicas)
         spec.set_config("spec.maxReplicas", function.spec.max_replicas)
 
-    # set external code entry type when given
-    if function.spec.build.codeEntryType != "":
-        spec.set_config("spec.build.functionSourceCode", "")
-        spec.set_config("spec.build.codeEntryType", function.spec.build.codeEntryType)
-        spec.set_config("spec.build.codeEntryAttributes", function.spec.build.codeEntryAttributes)
-        if function.spec.build.source != "":
-            spec.set_config("spec.build.path", function.spec.build.source)
-
     dashboard = dashboard or mlconf.nuclio_dashboard_url
     if function.spec.base_spec:
         config = nuclio.config.extend_config(
@@ -695,6 +689,9 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         name = get_fullname(function.metadata.name, project, tag)
         function.status.nuclio_name = name
         update_in(config, "metadata.name", name)
+        logger.warning(
+            "deploying from base spec", config=config
+        )
         return nuclio.deploy.deploy_config(
             config,
             dashboard,
