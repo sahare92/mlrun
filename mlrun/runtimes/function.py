@@ -649,6 +649,10 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
     tag = function.metadata.tag
     handler = function.spec.function_handler
 
+    logger.warning(
+        "Testing the logger!"
+    )
+
     # In Nuclio 1.6.0 default serviceType changed to "ClusterIP", make sure we're using NodePort
     spec.set_config("spec.serviceType", "NodePort")
     if function.spec.readiness_timeout:
