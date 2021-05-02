@@ -708,13 +708,13 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         )
     else:
         logger.warning(
-            "Resolved config", spec=spec,
+            "Resolved config", spec=spec, handler=handler,
         )
         name, config, code = nuclio.build_file(
             function.spec.source,
             name=function.metadata.name,
             project=project,
-            handler=handler,
+            handler="",
             tag=tag,
             spec=spec,
             kind=function.spec.function_kind,
