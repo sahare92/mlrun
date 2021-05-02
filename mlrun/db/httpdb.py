@@ -1870,7 +1870,7 @@ class HTTPRunDB(RunDBInterface):
         except ValueError:
             # This will mostly happen in dev scenarios when the version is unstable and such - therefore we're ignoring
             logger.warning(
-                "Unable to parse server or client version. Assuming compatible",
+                "lalalaUnable to parse server or client version. Assuming compatible",
                 server_version=server_version,
                 client_version=client_version,
             )
