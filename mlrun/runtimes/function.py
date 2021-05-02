@@ -171,6 +171,7 @@ class RemoteRuntime(KubeResource):
     def from_remote_source(self,
                            source,
                            handler="",
+                           runtime="",
                            code_entry_type="",
                            work_dir="",
                            branch="",
@@ -229,6 +230,7 @@ class RemoteRuntime(KubeResource):
         # populate spec with relevant fields
         config = nuclio.config.new_config()
         update_in(config, "spec.handler", handler or self.spec.function_handler)
+        update_in(config, "spec.runtime", runtime)
         update_in(config, "spec.build.path", source)
         update_in(config, "spec.build.codeEntryType", code_entry_type)
         update_in(config, "spec.build.codeEntryAttributes", code_entry_attributes)
