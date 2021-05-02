@@ -202,8 +202,8 @@ class RemoteRuntime(KubeResource):
             "username": username,
             "password": password,
             "s3Region": s3_region,
-            "s3AccessKeyId": s3_access_key_id,
-            "s3SecretAccessKey": s3_secret_access_key,
+            "s3AccessKeyId": s3_access_key_id or getenv("AWS_ACCESS_KEY_ID"),
+            "s3SecretAccessKey": s3_secret_access_key or getenv("AWS_SECRET_ACCESS_KEY"),
             "s3SessionToken": s3_session_token,
         }
 
