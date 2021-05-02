@@ -170,8 +170,8 @@ class RemoteRuntime(KubeResource):
 
     def from_remote_source(self,
                            source,
-                           handler="",
-                           runtime="",
+                           handler,
+                           runtime,
                            code_entry_type="",
                            work_dir="",
                            branch="",
@@ -187,6 +187,12 @@ class RemoteRuntime(KubeResource):
         code_entry_type = code_entry_type or self._resolve_code_entry_type(source)
         if code_entry_type == "":
             raise ValueError("Couldn't resolve code entry type from source")
+
+        handler = handler or self.spec.function_handler
+        if handler == "":
+            raise ValueError("Handler must be set to a non empty value")
+        if runtime == "":
+            raise ValueError("Runtime must be set to a non empty value")
 
         code_entry_attributes = {
             "workDir": work_dir,
@@ -229,7 +235,7 @@ class RemoteRuntime(KubeResource):
 
         # populate spec with relevant fields
         config = nuclio.config.new_config()
-        update_in(config, "spec.handler", handler or self.spec.function_handler)
+        update_in(config, "spec.handler", handler)
         update_in(config, "spec.runtime", runtime)
         update_in(config, "spec.build.path", source)
         update_in(config, "spec.build.codeEntryType", code_entry_type)
