@@ -666,6 +666,7 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
 
     # set external code entry type when given
     if function.spec.build.codeEntryType != "":
+        spec.set_config("spec.build.functionSourceCode", "")
         spec.set_config("spec.build.codeEntryType", function.spec.build.codeEntryType)
         spec.set_config("spec.build.codeEntryAttributes", function.spec.build.codeEntryAttributes)
         if function.spec.build.source != "":
@@ -686,6 +687,9 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         name = get_fullname(function.metadata.name, project, tag)
         function.status.nuclio_name = name
         update_in(config, "metadata.name", name)
+        logger.warning(
+            "Resolved config", config=config
+        )
         return nuclio.deploy.deploy_config(
             config,
             dashboard,
