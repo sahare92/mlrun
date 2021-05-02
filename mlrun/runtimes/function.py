@@ -170,6 +170,7 @@ class RemoteRuntime(KubeResource):
 
     def from_remote_source(self,
                            source,
+                           handler="",
                            code_entry_type="",
                            work_dir="",
                            branch="",
@@ -182,6 +183,10 @@ class RemoteRuntime(KubeResource):
                            s3_secret_access_key="",
                            s3_session_token="",
                            v3io_access_key=""):
+        code_entry_type = code_entry_type or self._resolve_code_entry_type(source)
+        if code_entry_type == "":
+            raise ValueError("Couldn't resolve code entry type from source")
+
         code_entry_attributes = {
             "workDir": work_dir,
             "branch": branch,
@@ -194,9 +199,6 @@ class RemoteRuntime(KubeResource):
             "s3SecretAccessKey": s3_secret_access_key,
             "s3SessionToken": s3_session_token,
         }
-        code_entry_type = code_entry_type or self._resolve_code_entry_type(source)
-        if code_entry_type == "":
-            raise ValueError("Couldn't resolve code entry type from source")
 
         # archive
         if code_entry_type == "archive":
@@ -228,6 +230,8 @@ class RemoteRuntime(KubeResource):
         self.spec.build.source = source
         self.spec.build.codeEntryType = code_entry_type
         self.spec.build.codeEntryAttributes = code_entry_attributes
+        if handler:
+            self.spec.function_handler = handler
         return self
 
     def with_v3io(self, local="", remote=""):
@@ -670,8 +674,6 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
 
     # set external code entry type when given
     if function.spec.build.codeEntryType != "":
-        handler = ""
-        spec.set_config("spec.handler", "")
         spec.set_config("spec.build.functionSourceCode", "")
         spec.set_config("spec.build.codeEntryType", function.spec.build.codeEntryType)
         spec.set_config("spec.build.codeEntryAttributes", function.spec.build.codeEntryAttributes)
@@ -693,9 +695,6 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         name = get_fullname(function.metadata.name, project, tag)
         function.status.nuclio_name = name
         update_in(config, "metadata.name", name)
-        logger.warning(
-            "Resolved config", config=config
-        )
         return nuclio.deploy.deploy_config(
             config,
             dashboard,
@@ -714,7 +713,7 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
             function.spec.source,
             name=function.metadata.name,
             project=project,
-            handler="",
+            handler=handler,
             tag=tag,
             spec=spec,
             kind=function.spec.function_kind,
