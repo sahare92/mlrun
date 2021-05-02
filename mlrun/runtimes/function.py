@@ -708,7 +708,7 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
         )
     else:
         logger.warning(
-            "Resolved config", spec=spec, handler=handler,
+            "Resolved config", spec_extra_config=spec.extra_config, handler=handler,
         )
         name, config, code = nuclio.build_file(
             function.spec.source,
