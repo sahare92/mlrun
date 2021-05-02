@@ -670,6 +670,7 @@ def deploy_nuclio_function(function: RemoteRuntime, dashboard="", watch=False):
 
     # set external code entry type when given
     if function.spec.build.codeEntryType != "":
+        spec.set_config("spec.handler", "")
         spec.set_config("spec.build.functionSourceCode", "")
         spec.set_config("spec.build.codeEntryType", function.spec.build.codeEntryType)
         spec.set_config("spec.build.codeEntryAttributes", function.spec.build.codeEntryAttributes)
