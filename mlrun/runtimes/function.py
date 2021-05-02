@@ -170,8 +170,8 @@ class RemoteRuntime(KubeResource):
 
     def from_remote_source(self,
                            source,
-                           handler,
                            runtime,
+                           handler="",
                            code_entry_type="",
                            work_dir="",
                            branch="",
